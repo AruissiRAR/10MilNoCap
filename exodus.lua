@@ -1,4 +1,4 @@
-print("Exodus Init!")
+print("exodus init!")
 
 repeat task.wait() until game:IsLoaded()
 
@@ -638,63 +638,61 @@ function Render:UpdateChildren(property)
     end
 end
 
-pcall(function()
-    function Render:Destroy(from_clear)
-        if self._exists then
-            rawset(self, "_exists", false)
-            destroy(self._render)
-    
-            if self._outline then
-                destroy(self._outline)
-            end
-    
-            for _, event in next, self._events do
-                if typeof(event) == "table" and event.Destroy then
-                    event:Destroy()
-                end
-            end
-    
-            if not from_clear then
-                remove(genv.render_cache, self._cacheIndex)
-    
-                for i, object in next, genv.render_cache do
-                    if i >= self._cacheIndex then
-                        rawset(object, "_cacheIndex", object._cacheIndex - 1)
-                    end
-                end
-    
-                local i, child = next(self._children)
-    
-                while child do
-                    remove(self._children, i)
-                    child:Destroy()
-                    
-                    i, child = next(self._children)
-                end
-            end
-    
-            objects[self] = nil
-    
-            if events[self] then
-                events[self] = nil
-            end
-    
-            if self.Parent then
-                if self.Parent._children[self._childrenIndex] == self then
-                    remove(self.Parent._children, self._childrenIndex)
-                end
-    
-                if self.Parent._list and self._class ~= "Text" then
-                    self.Parent._list:RemoveObject(self)
-                end
-            end
-    
-            if self._listConnection then
-                self._listConnection:Disconnect()
+function Render:Destroy(from_clear)
+    if self._exists then
+        rawset(self, "_exists", false)
+        destroy(self._render)
+
+        if self._outline then
+            destroy(self._outline)
+        end
+
+        for _, event in next, self._events do
+            if typeof(event) == "table" and event.Destroy then
+                event:Destroy()
             end
         end
-    end    
-end)
+
+        if not from_clear then
+            remove(genv.render_cache, self._cacheIndex)
+
+            for i, object in next, genv.render_cache do
+                if i >= self._cacheIndex then
+                    rawset(object, "_cacheIndex", object._cacheIndex - 1)
+                end
+            end
+
+            local i, child = next(self._children)
+
+            while child do
+                remove(self._children, i)
+                child:Destroy()
+                
+                i, child = next(self._children)
+            end
+        end
+
+        objects[self] = nil
+
+        if events[self] then
+            events[self] = nil
+        end
+
+        if self.Parent then
+            if self.Parent._children[self._childrenIndex] == self then
+                remove(self.Parent._children, self._childrenIndex)
+            end
+
+            if self.Parent._list and self._class ~= "Text" then
+                self.Parent._list:RemoveObject(self)
+            end
+        end
+
+        if self._listConnection then
+            self._listConnection:Disconnect()
+        end
+    end
+end
 
 function Render:GetChildren()
     return self._children
