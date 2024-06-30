@@ -1,6 +1,4 @@
-  --[[
-    Render object class thing for UI Libraries
-]]
+print("Exodus Init!")
 
 repeat task.wait() until game:IsLoaded()
 
