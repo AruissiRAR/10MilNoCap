@@ -1,4 +1,6 @@
-print("exodus init!")
+--[[
+    Render object class thing for UI Libraries
+]]
 
 repeat task.wait() until game:IsLoaded()
 
@@ -13,63 +15,9 @@ local spawn = task.spawn
 local genv = getgenv()
 local getupvalue = debug.getupvalue
 
-local Signal={}local Connection={}Signal.__index=Signal
-Connection.__index=Connection
-function Connection.new(signal,callback)local connection=signal._signal:Connect(callback)signal._count+=1
-signal.Active=true
-return setmetatable({Connected=true,_signal=signal,_connection=connection},Connection)end
-function Connection:Disconnect()self._connection:Disconnect()self.Connected=false
-self._signal._count-=1
-self._signal.Active=self._signal._count>0 end
-function Signal.new()local bindableEvent=newInstance("BindableEvent")return setmetatable({Active=false,_bindableEvent=bindableEvent,_signal=bindableEvent.Event,_count=0},Signal)end
-function Signal:OnConnect(callback)self._onConnect=callback end
-function Signal:Fire(...)self._bindableEvent:Fire(...)end
-function Signal:Connect(callback)if self._onConnect then self._onConnect()end
-return Connection.new(self,callback)end
-function Signal:Wait()return self._signal:Wait()end
-function Signal:Destroy()self._bindableEvent:Destroy()self.Active=false
-setmetatable(self,nil)end
-Signal.DisconnectAll=Signal.Destroy
-Signal.Disconnect=Signal.Destroy
-local List={}do List.__index=List
-function List.new(object,padding)return setmetatable({_contentSize=0,_padding=padding,_positions={},_object=object,_objects={},_indexes={},_sizes={}},List)end
-function List:AddObject(object)local size=object.AbsoluteSize.Y
-local idx=#self._objects+1
-local padding=#self._objects*self._padding
-local position=self._contentSize
-if object.Parent~=self._object then object.Parent=self._object end
-object.Position=newUDim2(0,0,0,position)self._objects[idx]=object
-self._positions[object]=position
-self._indexes[object]=idx
-self._sizes[object]=size
-self._contentSize+=size+self._padding end
-function List:RemoveObject(object)local size=self._sizes[object]+self._padding
-local idx=self._indexes[object]for i,obj in next,self._objects do if i>idx then self._indexes[obj]-=1
-self._positions[obj]-=size
-obj.Position=newUDim2(0,0,0,self._positions[obj])end end
-remove(self._objects,idx)self._contentSize-=size end
-function List:UpdateObject(object)local diff=object.AbsoluteSize.Y-self._sizes[object]local idx=self._indexes[object]for i,obj in next,self._objects do if i>idx then self._positions[obj]+=diff
-obj.Position=newUDim2(0,0,0,self._positions[obj])end end
-self._sizes[object]+=diff
-self._contentSize+=diff end end
-local Tween={}do Tween.__index=Tween
-local render=game:GetService("RunService").RenderStepped
-local sqrt,sin,pi,halfpi,doublepi=math.sqrt,math.sin,math.pi,math.pi/2,math.pi*2
-local type=type
-local wait=task.wait
-local s=1.70158
-local s1=2.5949095
-local p=0.3
-local p1=0.45
-local EasingStyle={[Enum.EasingStyle.Linear]={[Enum.EasingDirection.In]=function(delta)return delta end,[Enum.EasingDirection.Out]=function(delta)return delta end,[Enum.EasingDirection.InOut]=function(delta)return delta end},[Enum.EasingStyle.Cubic]={[Enum.EasingDirection.In]=function(delta)return delta^3 end,[Enum.EasingDirection.Out]=function(delta)return(delta-1)^3+1 end,[Enum.EasingDirection.InOut]=function(delta)if delta<=0.5 then return(4*delta)^3 else return(4*(delta-1))^3+1 end end},[Enum.EasingStyle.Quad]={[Enum.EasingDirection.In]=function(delta)return delta^2 end,[Enum.EasingDirection.Out]=function(delta)return-(delta-1)^2+1 end,[Enum.EasingDirection.InOut]=function(delta)if delta<=0.5 then return(2*delta)^2 else return(-2*(delta-1))^2+1 end end},[Enum.EasingStyle.Quart]={[Enum.EasingDirection.In]=function(delta)return delta^4 end,[Enum.EasingDirection.Out]=function(delta)return-(delta-1)^4+1 end,[Enum.EasingDirection.InOut]=function(delta)if delta<=0.5 then return(8*delta)^4 else return(-8*(delta-1))^4+1 end end},[Enum.EasingStyle.Quint]={[Enum.EasingDirection.In]=function(delta)return delta^5 end,[Enum.EasingDirection.Out]=function(delta)return(delta-1)^5+1 end,[Enum.EasingDirection.InOut]=function(delta)if delta<=0.5 then return(16*delta)^5 else return(16*(delta-1))^5+1 end end},[Enum.EasingStyle.Sine]={[Enum.EasingDirection.In]=function(delta)return sin(halfpi*delta-halfpi)end,[Enum.EasingDirection.Out]=function(delta)return sin(halfpi*delta)end,[Enum.EasingDirection.InOut]=function(delta)return 0.5*sin(pi*delta-pi/2)+0.5 end},[Enum.EasingStyle.Exponential]={[Enum.EasingDirection.In]=function(delta)return 2^(10*delta-10)-0.001 end,[Enum.EasingDirection.Out]=function(delta)return 1.001*-2^(-10*delta)+1 end,[Enum.EasingDirection.InOut]=function(delta)if delta<=0.5 then return 0.5*2^(20*delta-10)-0.0005 else return 0.50025*-2^(-20*delta+10)+1 end end},[Enum.EasingStyle.Back]={[Enum.EasingDirection.In]=function(delta)return delta^2*(delta*(s+1)-s)end,[Enum.EasingDirection.Out]=function(delta)return(delta-1)^2*((delta-1)*(s+1)+s)+1 end,[Enum.EasingDirection.InOut]=function(delta)if delta<=0.5 then return(2*delta*delta)*((2*delta)*(s1+1)-s1)else return 0.5*((delta*2)-2)^2*((delta*2-2)*(s1+1)+s1)+1 end end},[Enum.EasingStyle.Bounce]={[Enum.EasingDirection.In]=function(delta)if delta<=0.25/2.75 then return-7.5625*(1-delta-2.625/2.75)^2+0.015625 elseif delta<=0.75/2.75 then return-7.5625*(1-delta-2.25/2.75)^2+0.0625 elseif delta<=1.75/2.75 then return-7.5625*(1-delta-1.5/2.75)^2+0.25 else return 1-7.5625*(1-delta)^2 end end,[Enum.EasingDirection.Out]=function(delta)if delta<=1/2.75 then return 7.5625*(delta*delta)elseif delta<=2/2.75 then return 7.5625*(delta-1.5/2.75)^2+0.75 elseif delta<=2.5/2.75 then return 7.5625*(delta-2.25/2.75)^2+0.9375 else return 7.5625*(delta-2.625/2.75)^2+0.984375 end end,[Enum.EasingDirection.InOut]=function(delta)if delta<=0.125/2.75 then return 0.5*(-7.5625*(1-delta*2-2.625/2.75)^2+0.015625)elseif delta<=0.375/2.75 then return 0.5*(-7.5625*(1-delta*2-2.25/2.75)^2+0.0625)elseif delta<=0.875/2.75 then return 0.5*(-7.5625*(1-delta*2-1.5/2.75)^2+0.25)elseif delta<=0.5 then return 0.5*(1-7.5625*(1-delta*2)^2)elseif delta<=1.875/2.75 then return 0.5+3.78125*(2*delta-1)^2 elseif delta<=2.375/2.75 then return 3.78125*(2*delta-4.25/2.75)^2+0.875 elseif delta<=2.625/2.75 then return 3.78125*(2*delta-5/2.75)^2+0.96875 else return 3.78125*(2*delta-5.375/2.75)^2+0.9921875 end end},[Enum.EasingStyle.Elastic]={[Enum.EasingDirection.In]=function(delta)return-2^(10*(delta-1))*sin(doublepi*(delta-1-p/4)/p)end,[Enum.EasingDirection.Out]=function(delta)return 2^(-10*delta)*sin(doublepi*(delta-p/4)/p)+1 end,[Enum.EasingDirection.InOut]=function(delta)if delta<=0.5 then return-0.5*2^(20*delta-10)*sin(doublepi*(delta*2-1.1125)/p1)else return 0.5*2^(-20*delta+10)*sin(doublepi*(delta*2-1.1125)/p1)+1 end end},[Enum.EasingStyle.Circular]={[Enum.EasingDirection.In]=function(delta)return-sqrt(1-delta^2)+1 end,[Enum.EasingDirection.Out]=function(delta)return sqrt(-(delta-1)^2+1)end,[Enum.EasingDirection.InOut]=function(delta)if delta<=0.5 then return-sqrt(-delta^2+0.25)+0.5 else return sqrt(-(delta-1)^2+0.25)+0.5 end end}}local function lerp(value1,value2,alpha)if type(value1)=="number"then return value1+((value2-value1)*alpha)end
-return value1:lerp(value2,alpha)end
-function Tween.new(object,info,properties)return setmetatable({Completed=Signal.new(),_object=object,_time=info.Time,_easing=EasingStyle[info.EasingStyle][info.EasingDirection],_properties=properties},Tween)end
-function Tween:Play()for property,value in next,self._properties do local start_value=self._object[property]spawn(function()local elapsed=0
-while elapsed<=self._time and not self._cancelled do local delta=elapsed/self._time
-local alpha=self._easing(delta)spawn(function()self._object[property]=lerp(start_value,value,alpha)end)elapsed+=render:Wait()end
-if not self._cancelled then self._object[property]=value end end)end
-spawn(function()wait(self._time)if not self._cancelled then self.Completed:Fire()end end)end
-function Tween:Cancel()self._cancelled=true end end
+local Signal={}local Connection={}Signal.__index=Signal;Connection.__index=Connection;function Connection.new(signal,callback)local connection=signal._signal:Connect(callback)signal._count+=1;signal.Active=true;return setmetatable({Connected=true,_signal=signal,_connection=connection},Connection)end;function Connection:Disconnect()self._connection:Disconnect()self.Connected=false;self._signal._count-=1;self._signal.Active=self._signal._count>0 end;function Signal.new()local bindableEvent=newInstance("BindableEvent")return setmetatable({Active=false,_bindableEvent=bindableEvent,_signal=bindableEvent.Event,_count=0},Signal)end;function Signal:OnConnect(callback)self._onConnect=callback end;function Signal:Fire(...)self._bindableEvent:Fire(...)end;function Signal:Connect(callback)if self._onConnect then self._onConnect()end;return Connection.new(self,callback)end;function Signal:Wait()return self._signal:Wait()end;function Signal:Destroy()self._bindableEvent:Destroy()self.Active=false;setmetatable(self,nil)end;Signal.DisconnectAll=Signal.Destroy;Signal.Disconnect=Signal.Destroy
+local List={}do List.__index=List;function List.new(object,padding)return setmetatable({_contentSize=0,_padding=padding,_positions={},_object=object,_objects={},_indexes={},_sizes={}},List)end;function List:AddObject(object)local size=object.AbsoluteSize.Y;local idx=#self._objects+1;local padding=#self._objects*self._padding;local position=self._contentSize;if object.Parent~=self._object then object.Parent=self._object end;object.Position=newUDim2(0,0,0,position)self._objects[idx]=object;self._positions[object]=position;self._indexes[object]=idx;self._sizes[object]=size;self._contentSize+=size+self._padding end;function List:RemoveObject(object)local size=self._sizes[object]+self._padding;local idx=self._indexes[object]for i,obj in next,self._objects do if i>idx then self._indexes[obj]-=1;self._positions[obj]-=size;obj.Position=newUDim2(0,0,0,self._positions[obj])end end;remove(self._objects,idx)self._contentSize-=size end;function List:UpdateObject(object)local diff=object.AbsoluteSize.Y-self._sizes[object]local idx=self._indexes[object]for i,obj in next,self._objects do if i>idx then self._positions[obj]+=diff;obj.Position=newUDim2(0,0,0,self._positions[obj])end end;self._sizes[object]+=diff;self._contentSize+=diff end end
+local Tween={}do Tween.__index=Tween;local render=game:GetService("RunService").RenderStepped;local sqrt,sin,pi,halfpi,doublepi=math.sqrt,math.sin,math.pi,math.pi/2,math.pi*2;local type=type;local wait=task.wait;local s=1.70158;local s1=2.5949095;local p=0.3;local p1=0.45;local EasingStyle={[Enum.EasingStyle.Linear]={[Enum.EasingDirection.In]=function(delta)return delta end,[Enum.EasingDirection.Out]=function(delta)return delta end,[Enum.EasingDirection.InOut]=function(delta)return delta end},[Enum.EasingStyle.Cubic]={[Enum.EasingDirection.In]=function(delta)return delta^3 end,[Enum.EasingDirection.Out]=function(delta)return(delta-1)^3+1 end,[Enum.EasingDirection.InOut]=function(delta)if delta<=0.5 then return(4*delta)^3 else return(4*(delta-1))^3+1 end end},[Enum.EasingStyle.Quad]={[Enum.EasingDirection.In]=function(delta)return delta^2 end,[Enum.EasingDirection.Out]=function(delta)return-(delta-1)^2+1 end,[Enum.EasingDirection.InOut]=function(delta)if delta<=0.5 then return(2*delta)^2 else return(-2*(delta-1))^2+1 end end},[Enum.EasingStyle.Quart]={[Enum.EasingDirection.In]=function(delta)return delta^4 end,[Enum.EasingDirection.Out]=function(delta)return-(delta-1)^4+1 end,[Enum.EasingDirection.InOut]=function(delta)if delta<=0.5 then return(8*delta)^4 else return(-8*(delta-1))^4+1 end end},[Enum.EasingStyle.Quint]={[Enum.EasingDirection.In]=function(delta)return delta^5 end,[Enum.EasingDirection.Out]=function(delta)return(delta-1)^5+1 end,[Enum.EasingDirection.InOut]=function(delta)if delta<=0.5 then return(16*delta)^5 else return(16*(delta-1))^5+1 end end},[Enum.EasingStyle.Sine]={[Enum.EasingDirection.In]=function(delta)return sin(halfpi*delta-halfpi)end,[Enum.EasingDirection.Out]=function(delta)return sin(halfpi*delta)end,[Enum.EasingDirection.InOut]=function(delta)return 0.5*sin(pi*delta-pi/2)+0.5 end},[Enum.EasingStyle.Exponential]={[Enum.EasingDirection.In]=function(delta)return 2^(10*delta-10)-0.001 end,[Enum.EasingDirection.Out]=function(delta)return 1.001*-2^(-10*delta)+1 end,[Enum.EasingDirection.InOut]=function(delta)if delta<=0.5 then return 0.5*2^(20*delta-10)-0.0005 else return 0.50025*-2^(-20*delta+10)+1 end end},[Enum.EasingStyle.Back]={[Enum.EasingDirection.In]=function(delta)return delta^2*(delta*(s+1)-s)end,[Enum.EasingDirection.Out]=function(delta)return(delta-1)^2*((delta-1)*(s+1)+s)+1 end,[Enum.EasingDirection.InOut]=function(delta)if delta<=0.5 then return(2*delta*delta)*((2*delta)*(s1+1)-s1)else return 0.5*((delta*2)-2)^2*((delta*2-2)*(s1+1)+s1)+1 end end},[Enum.EasingStyle.Bounce]={[Enum.EasingDirection.In]=function(delta)if delta<=0.25/2.75 then return-7.5625*(1-delta-2.625/2.75)^2+0.015625 elseif delta<=0.75/2.75 then return-7.5625*(1-delta-2.25/2.75)^2+0.0625 elseif delta<=1.75/2.75 then return-7.5625*(1-delta-1.5/2.75)^2+0.25 else return 1-7.5625*(1-delta)^2 end end,[Enum.EasingDirection.Out]=function(delta)if delta<=1/2.75 then return 7.5625*(delta*delta)elseif delta<=2/2.75 then return 7.5625*(delta-1.5/2.75)^2+0.75 elseif delta<=2.5/2.75 then return 7.5625*(delta-2.25/2.75)^2+0.9375 else return 7.5625*(delta-2.625/2.75)^2+0.984375 end end,[Enum.EasingDirection.InOut]=function(delta)if delta<=0.125/2.75 then return 0.5*(-7.5625*(1-delta*2-2.625/2.75)^2+0.015625)elseif delta<=0.375/2.75 then return 0.5*(-7.5625*(1-delta*2-2.25/2.75)^2+0.0625)elseif delta<=0.875/2.75 then return 0.5*(-7.5625*(1-delta*2-1.5/2.75)^2+0.25)elseif delta<=0.5 then return 0.5*(1-7.5625*(1-delta*2)^2)elseif delta<=1.875/2.75 then return 0.5+3.78125*(2*delta-1)^2 elseif delta<=2.375/2.75 then return 3.78125*(2*delta-4.25/2.75)^2+0.875 elseif delta<=2.625/2.75 then return 3.78125*(2*delta-5/2.75)^2+0.96875 else return 3.78125*(2*delta-5.375/2.75)^2+0.9921875 end end},[Enum.EasingStyle.Elastic]={[Enum.EasingDirection.In]=function(delta)return-2^(10*(delta-1))*sin(doublepi*(delta-1-p/4)/p)end,[Enum.EasingDirection.Out]=function(delta)return 2^(-10*delta)*sin(doublepi*(delta-p/4)/p)+1 end,[Enum.EasingDirection.InOut]=function(delta)if delta<=0.5 then return-0.5*2^(20*delta-10)*sin(doublepi*(delta*2-1.1125)/p1)else return 0.5*2^(-20*delta+10)*sin(doublepi*(delta*2-1.1125)/p1)+1 end end},[Enum.EasingStyle.Circular]={[Enum.EasingDirection.In]=function(delta)return-sqrt(1-delta^2)+1 end,[Enum.EasingDirection.Out]=function(delta)return sqrt(-(delta-1)^2+1)end,[Enum.EasingDirection.InOut]=function(delta)if delta<=0.5 then return-sqrt(-delta^2+0.25)+0.5 else return sqrt(-(delta-1)^2+0.25)+0.5 end end}}local function lerp(value1,value2,alpha)if type(value1)=="number"then return value1+((value2-value1)*alpha)end;return value1:lerp(value2,alpha)end;function Tween.new(object,info,properties)return setmetatable({Completed=Signal.new(),_object=object,_time=info.Time,_easing=EasingStyle[info.EasingStyle][info.EasingDirection],_properties=properties},Tween)end;function Tween:Play()for property,value in next,self._properties do local start_value=self._object[property]spawn(function()local elapsed=0;while elapsed<=self._time and not self._cancelled do local delta=elapsed/self._time;local alpha=self._easing(delta)spawn(function()self._object[property]=lerp(start_value,value,alpha)end)elapsed+=render:Wait()end;if not self._cancelled then self._object[property]=value end end)end;spawn(function()wait(self._time)if not self._cancelled then self.Completed:Fire()end end)end;function Tween:Cancel()self._cancelled=true end end
 
 -- Library
 genv.render_cache = render_cache or {}
@@ -113,7 +61,7 @@ local getproperty = is_synX and getupvalue(line_mt.__index, 4) or getrenderprope
 end
 
 local function round_position(position)
-    return newVector2(math.floor(position.X), math.floor(position.Y))
+    return newVector2(math.floor(position.X), math.floor(position.Y));
 end
 
 local function queue_property_set(object, property, value)
@@ -413,7 +361,7 @@ function Render:Set(property, value)
             new_position = calculate_udim2(value, workspace.CurrentCamera.ViewportSize)
         end
 
-        new_position = round_position(new_position)
+        new_position = round_position(new_position);
         self._properties.Position = value
 
         if self._outline and self.AbsoluteVisible then
@@ -590,7 +538,7 @@ end
 function Render:UpdateChildren(property)
     if property == "Position" then
         for _, child in next, self._children do
-            local new_position = round_position(self.AbsolutePosition + calculate_udim2(child.Position, self.AbsoluteSize))
+            local new_position = round_position(self.AbsolutePosition + calculate_udim2(child.Position, self.AbsoluteSize));
             child._properties.AbsolutePosition = new_position
 
             queue_property_set(child, "Position", new_position)
@@ -727,9 +675,9 @@ local upper = string.upper
 local round, clamp, floor = math.round, math.clamp, math.floor
 local newInfo = TweenInfo.new
 local newColor3, fromHex, fromHSV = Color3.new, Color3.fromHex, Color3.fromHSV
-local decode = crypt and crypt.base64decode
+local decode = (syn and syn.crypt.base64.decode) or (crypt and crypt.base64decode) or base64_decode
 local unpack, clear, clone, find, concat = table.unpack, table.clear, table.clone, table.find, table.concat
-local request = request
+local request = syn and syn.request or request
 local inset = services.GuiService:GetGuiInset().Y
 local wait = task.wait
 
@@ -781,7 +729,7 @@ local library = {
     }
 }
 
-library.theme = clone(library.themes["Default"])
+library.theme = clone(library.themes["Default"]);
 library.paste_textbox.Position = newUDim2(-200, 0, 0, 0)
 
 function Render:Create(class, properties, no_cache)
@@ -839,17 +787,6 @@ utility.formatted_metatable = {
         return rawset(self, key, value)
     end
 }
-
-function utility.mousething(toggle)
-    if not toggle then
-        return
-    end
-
-    taskspawn(LPH_NO_VIRTUALIZE(function()
-        UserInputService.MouseIconEnabled = true
-        UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-    end))
-end
 
 function utility.format(tbl, metatable)
     local old = clone(tbl)
@@ -1262,7 +1199,7 @@ function components.tooltip(object, text)
 end
 
 function components.separator(section, str, zindex)
-    zindex = zindex or 10
+    zindex = zindex or 10;
     str = str or ""
 
     local holder = section.content:Create("Square", {
@@ -1316,7 +1253,7 @@ function components.separator(section, str, zindex)
 end
 
 function components.button(section, options, zindex)
-    zindex = zindex or 9
+    zindex = zindex or 9;
 
     utility.format(options)
 
@@ -1363,7 +1300,7 @@ function components.button(section, options, zindex)
 end
 
 function components.toggle(holder, options, zindex)
-    zindex = zindex or 9
+    zindex = zindex or 9;
 
     utility.format(options)
 
@@ -1432,7 +1369,7 @@ function components.toggle(holder, options, zindex)
                     library.keybind_list:Add(holder.name, "Disabled Text")
                 end
 
-                library.keybind_list:Change(holder.name, ("[%s] %s"):format(holder.key_str, options.name --[[ <- it was holder.name before ]]))
+                library.keybind_list:Change(holder.name, ("[%s] %s"):format(holder.key_str, holder.name))
             end
 
             disconnect_auto_color()
@@ -1625,8 +1562,7 @@ function components.slider(holder, options, zindex)
         ZIndex = zindex
     })
 
-    holder.plus = plus
-    holder.minus = minus
+    holder.plus = plus; holder.minus = minus
 
     if holder.keybind then
         plus.Position = newUDim2(1, -(13 + holder.keybind.AbsoluteSize.X), 0, 0)
@@ -1641,11 +1577,7 @@ function components.slider(holder, options, zindex)
     local current_tween
 
     local function set(value)
-        if not (value and type(value) == "number") then
-            return
-        end
-
-        value = clamp(utility.round(tonumber(value), options.float or 1), options.min, options.max)
+        value = clamp(utility.round(tonumber(value), options.float), options.min, options.max)
         value_text.Text = utility.tostring(value) .. options.suffix
 
         if value ~= current_value then
@@ -1738,7 +1670,18 @@ local keys = {
     [Enum.UserInputType.MouseButton3] = "MOUSE-3"
 }
 
-local blacklisted_keys = {} -- we dont wanna use this, trust me - cracker monkey
+local blacklisted_keys = {
+    [Enum.KeyCode.W] = true,
+    [Enum.KeyCode.A] = true,
+    [Enum.KeyCode.S] = true,
+    [Enum.KeyCode.D] = true,
+    [Enum.KeyCode.Space] = true,
+    [Enum.KeyCode.Escape] = true,
+    [Enum.KeyCode.Backspace] = true,
+    [Enum.KeyCode.Slash] = true,
+    [Enum.KeyCode.Delete] = true,
+    [Enum.KeyCode.Insert] = true
+}
 
 local enums = {}
 
@@ -1838,7 +1781,7 @@ function components.keybind(holder, options, zindex)
                 end
 
                 if library.keybind_list:Exists(holder.name) then
-                    library.keybind_list:Change(holder.name, ("[%s] %s"):format(key_str, options.name --[[ <- it was holder.name before ]]))
+                    library.keybind_list:Change(holder.name, ("[%s] %s"):format(key_str, holder.name))
                 end
             end
 
@@ -2073,7 +2016,7 @@ function components.dropdown(holder, options, zindex)
 
                 update_value()
 
-                local option_object = option_objects[chosen]
+                local option_object = option_objects[chosen];
 
                 if (option_object) then
                     option_object.chosen = true
@@ -2081,6 +2024,27 @@ function components.dropdown(holder, options, zindex)
 
                     library:ChangeThemeObject(option_object.text, "Text")
 
+                    library.flags[options.flag] = chosen
+                    options.callback(chosen)
+                end
+            else
+                if not is_config then
+                    current = nil
+
+                    update_value()
+
+                    local option_object = option_objects[chosen];
+
+                    if (option_object) then
+                        option_object.chosen = false
+                        option_object.object:Tween(newInfo(library.tween_speed, library.easing_style), {Transparency = 0})
+
+                        library:ChangeThemeObject(option_object.text, "Disabled Text")
+                        
+                        library.flags[options.flag] = nil
+                        options.callback(nil)
+                    end
+                else
                     library.flags[options.flag] = chosen
                     options.callback(chosen)
                 end
@@ -2342,7 +2306,7 @@ function components.colorpicker(holder, options, zindex)
         Theme = "Window Border",
         ZIndex = zindex + 13,
         OutlineTheme = "Black Border"
-    })
+    });
 
     window:Create("Square", {
         Size = newUDim2(1, 0, 1, -19),
@@ -2350,7 +2314,7 @@ function components.colorpicker(holder, options, zindex)
         ZIndex = zindex + 15,
         Theme = "Tab Background",
         OutlineTheme = "Tab Border"
-    })
+    });
 
     local saturation_frame = window:Create("Square", {
         Color = options.default,
@@ -2437,7 +2401,7 @@ function components.colorpicker(holder, options, zindex)
     local function set(color, opacity, from_input, no_picker_update)
         if typeof(color) == "table" then
             opacity =  color.alpha
-            color = fromHex(tostring(color.color) or "000000")
+            color = fromHex(color.color)
         end
 
         if not options.alpha then
@@ -2595,26 +2559,26 @@ function components.colorpicker(holder, options, zindex)
 end
 
 function components.subgroup(holder, options, zindex)
-    zindex = zindex or 11
+    zindex = zindex or 11;
 
-    utility.format(options)
+    utility.format(options);
 
     utility.defaults(options, {
         name = "subgroup"
-    })
+    });
 
     local icon = holder.main:Create("Square", {
         Size = newUDim2(0, 18, 0, 9),
         Position = newUDim2(1, -20, 0, 2),
         ZIndex = zindex,
         OutlineTheme = "Object Border"
-    })
+    });
 
     icon:Create("Image", {
         Size = newUDim2(1, 0, 1, 0),
         ZIndex = zindex - 1,
         Data = decode("iVBORw0KGgoAAAANSUhEUgAAABIAAAAKBAMAAABLZROSAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAGUExURb+/v////5nD/3QAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAVSURBVBjTY2AQhEIkliAWSLY6QQYAknwC7Za+1vYAAAAASUVORK5CYII=")
-    })
+    });
 
     local window = icon:Create("Square", {
         Theme = "Object Background",
@@ -2623,7 +2587,7 @@ function components.subgroup(holder, options, zindex)
         Outline = false,
         Position = newUDim2(1, 5, 0, 0),
         ZIndex = zindex + 13
-    })
+    });
 
     window:Create("Text", {
         Text = options.name,
@@ -2632,7 +2596,7 @@ function components.subgroup(holder, options, zindex)
         Position = newUDim2(0, 6, 0, 3),
         Theme = "Text",
         ZIndex = zindex + 16
-    })
+    });
 
     window:Create("Square", {
         Size = newUDim2(1, 2, 1, 2),
@@ -2640,7 +2604,7 @@ function components.subgroup(holder, options, zindex)
         Theme = "Window Background",
         OutlineTheme = "Black Border",
         ZIndex = zindex + 12,
-    })
+    });
 
     window:Create("Square", {
         Size = newUDim2(1, 0, 0, 19),
@@ -2653,7 +2617,7 @@ function components.subgroup(holder, options, zindex)
         Theme = "Window Border",
         ZIndex = zindex + 13,
         OutlineTheme = "Black Border"
-    })
+    });
 
     window:Create("Square", {
         Size = newUDim2(1, 0, 1, -19),
@@ -2661,21 +2625,21 @@ function components.subgroup(holder, options, zindex)
         ZIndex = zindex + 15,
         Theme = "Tab Background",
         OutlineTheme = "Tab Border"
-    })
+    });
 
     icon.MouseButton1Click:Connect(function()
         if holder.section.tab.current_subgroup and holder.section.tab.current_subgroup ~= window then
-            holder.section.tab.current_subgroup.Visible = false
+            holder.section.tab.current_subgroup.Visible = false;
         end
 
-        holder.section.tab.current_subgroup = window
-        window.Visible = not window.Visible
-    end)
+        holder.section.tab.current_subgroup = window;
+        window.Visible = not window.Visible;
+    end);
 
-    local group_types = {}
+    local group_types = {};
 
-    utility.format(group_types, true)
-    return group_types
+    utility.format(group_types, true);
+    return group_types;
 end
 
 function components.list(options)
@@ -2785,7 +2749,7 @@ function components.list(options)
             Font = library.font,
             Size = library.font_size,
             Theme = theme,
-            ZIndex = 45
+            ZIndex = 44
         }, true)
 
         list.Size = newUDim2(0, options.sizex, 0, list_content._list._contentSize + 32)
@@ -2923,7 +2887,7 @@ function library:Toggle()
         self.Playerlist.object.Visible = self.Playerlist.toggled and not self.open or false
 
         for window, types in next, library.windows do
-            window.Visible = types.Visible and not self.open or false
+            window.Visible = types.Visible and not self.open or false;
         end
 
         if self.holder.Visible then
@@ -2984,9 +2948,9 @@ function library:FadeIn()
 end
 
 function library:Init()
-    self:LoadConfig(library:GetAutoLoadConfig())
-    self:FadeIn()
-    self.initialized = true
+    self:LoadConfig(library:GetAutoLoadConfig());
+    self:FadeIn();
+    self.initialized = true;
 end
 
 function library:CreateFolder(name)
@@ -3081,7 +3045,7 @@ function library:GetAutoLoadConfig()
     local file = ("%s\\%s.%s"):format(folder, "auto_load", "txt")
 
     if (isfile(file)) then
-        return readfile(file)
+        return readfile(file);
     end
 end
 
@@ -3125,13 +3089,11 @@ function library:LoadConfig(name)
                 local object = self.config_objects[flag]
 
                 if object then
-                    pcall(function()
-                        object:Set(value)                    
-                    end)
+                    object:Set(value)
                 end
             end
 
-            library:LoadTheme(self.flags["selected_theme"])
+            library:LoadTheme(self.flags["selected_theme"]);
 
             if (self.theme_colorpickers) then
                 for option, colorpicker in next, self.theme_colorpickers do
@@ -3265,7 +3227,7 @@ function library:DeleteTheme(name)
 end
 
 function library:Loader(options)
-    utility.format(options)
+    utility.format(options);
 
     utility.defaults(options, {
         title = "Exodus",
@@ -3276,10 +3238,10 @@ function library:Loader(options)
         changed = {},
         removed = {},
         callback = function() end,
-    })
+    });
 
-    local sizeX = 310
-    local sizeY = 123
+    local sizeX = 310;
+    local sizeY = 123;
 
     local window = Render:Create("Square", {
         Size = newUDim2(0, sizeX, 0, 22),
@@ -3288,7 +3250,7 @@ function library:Loader(options)
         Outline = false,
         Visible = true,
         Transparency = 0
-    })
+    });
 
     window:Create("Text", {
         Text = options.title,
@@ -3297,14 +3259,14 @@ function library:Loader(options)
         Position = newUDim2(0, 6, 0, 4),
         Theme = "Text",
         ZIndex = 124
-    })
+    });
 
     local main = window:Create("Square", {
         Size = newUDim2(1, 0, 0, sizeY),
         ZIndex = 123,
         Theme = "Window Background",
         Outline = false
-    })
+    });
 
     main:Create("Square", {
         Size = newUDim2(1, 2, 1, 2),
@@ -3312,7 +3274,7 @@ function library:Loader(options)
         Theme = "Window Border",
         ZIndex = 122,
         OutlineTheme = "Black Border"
-    })
+    });
 
     local background = main:Create("Square", {
         Size = newUDim2(1, 0, 1, -22),
@@ -3320,7 +3282,7 @@ function library:Loader(options)
         ZIndex = 125,
         Theme = "Tab Background",
         OutlineTheme = "Tab Border"
-    })
+    });
 
     local holder = background:Create("Square", {
         Size = newUDim2(1, -12, 1, -12),
@@ -3328,7 +3290,7 @@ function library:Loader(options)
         Transparency = 0,
         Visible = true,
         Outline = false
-    })
+    });
 
     local change_log = holder:Create("Square", {
         Visible = false,
@@ -3337,7 +3299,7 @@ function library:Loader(options)
         ZIndex = 128,
         Theme = "Tab Background",
         Outline = false
-    })
+    });
 
     change_log:Create("Square", {
         Size = newUDim2(1, 2, 1, 2),
@@ -3345,7 +3307,7 @@ function library:Loader(options)
         Theme = "Tab Border",
         ZIndex = 127,
         OutlineTheme = "Black Border"
-    })
+    });
 
     change_log:Create("Text", {
         Text = "Changelog - Last Update: " .. options.date,
@@ -3354,9 +3316,9 @@ function library:Loader(options)
         Position = newUDim2(0, 6, 0, 4),
         Theme = "Text",
         ZIndex = 129
-    })
+    });
 
-    local bound_addition = 0
+    local bound_addition = 0;
 
     for _, text in next, options.added do
         bound_addition += change_log:Create("Text", {
@@ -3366,7 +3328,7 @@ function library:Loader(options)
             Position = newUDim2(0, 6, 0, 20 + bound_addition),
             Color = newColor3(0.46, 1, 0.69),
             ZIndex = 129
-        }).TextBounds.Y
+        }).TextBounds.Y;
     end
 
     for _, text in next, options.changed do
@@ -3377,7 +3339,7 @@ function library:Loader(options)
             Position = newUDim2(0, 6, 0, 20 + bound_addition),
             Theme = "Disabled Text",
             ZIndex = 129
-        }).TextBounds.Y
+        }).TextBounds.Y;
     end
 
     for _, text in next, options.removed do
@@ -3388,12 +3350,12 @@ function library:Loader(options)
             Position = newUDim2(0, 6, 0, 20 + bound_addition),
             Color = newColor3(1, 0.258823, 0.258823),
             ZIndex = 129
-        }).TextBounds.Y
+        }).TextBounds.Y;
     end
 
-    change_log.Size = newUDim2(1, 0, 0, bound_addition + 26)
+    change_log.Size = newUDim2(1, 0, 0, bound_addition + 26);
 
-    local textbounds = utility.text_length(options.description, self.font, self.font_size)
+    local textbounds = utility.text_length(options.description, self.font, self.font_size);
 
     local description_text = holder:Create("Text", {
         Text = options.description,
@@ -3402,7 +3364,7 @@ function library:Loader(options)
         Position = newUDim2(0.5, -textbounds.X * 0.5, 0, 2.5),
         Theme = "Text",
         ZIndex = 126
-    })
+    });
 
     local slider = holder:Create("Square", {
         Size = newUDim2(1, 0, 0, 10),
@@ -3410,7 +3372,7 @@ function library:Loader(options)
         ZIndex = 126,
         Theme = "Object Background",
         OutlineTheme = "Object Border"
-    })
+    });
 
     local fill = slider:Create("Square", {
         Size = newUDim2(options.percentage * 0.01, 0, 1, 0),
@@ -3418,7 +3380,7 @@ function library:Loader(options)
         Ignored = true,
         Theme = "Accent",
         Outline = false
-    })
+    });
 
     fill:Create("Image", {
         Size = newUDim2(1, 0, 1, 0),
@@ -3433,7 +3395,7 @@ function library:Loader(options)
         ZIndex = 126,
         Theme = "Object Background",
         OutlineTheme = "Object Border"
-    })
+    });
 
     utility.auto_button_color(load, "Object Background", fromRGB(3, 3, 3), fromRGB(8, 8, 8))
 
@@ -3445,7 +3407,7 @@ function library:Loader(options)
         Theme = "Text",
         Center = true,
         ZIndex = 127
-    })
+    });
 
     local close = holder:Create("Square", {
         Position = newUDim2(0.5, 4, 0, 42),
@@ -3453,7 +3415,7 @@ function library:Loader(options)
         ZIndex = 126,
         Theme = "Object Background",
         OutlineTheme = "Object Border"
-    })
+    });
 
     utility.auto_button_color(close, "Object Background", fromRGB(3, 3, 3), fromRGB(8, 8, 8))
 
@@ -3465,7 +3427,7 @@ function library:Loader(options)
         Theme = "Text",
         Center = true,
         ZIndex = 127
-    })
+    });
 
     local changelog = holder:Create("Square", {
         Position = newUDim2(0, 0, 0, 69),
@@ -3473,7 +3435,7 @@ function library:Loader(options)
         ZIndex = 126,
         Theme = "Object Background",
         OutlineTheme = "Object Border"
-    })
+    });
 
     utility.auto_button_color(changelog, "Object Background", fromRGB(3, 3, 3), fromRGB(8, 8, 8))
 
@@ -3485,42 +3447,42 @@ function library:Loader(options)
         Theme = "Text",
         Center = true,
         ZIndex = 127
-    })
+    });
 
     local function resize()
-        main.Size = newUDim2(1, 0, 0, sizeY + (change_log.Visible and 34 + bound_addition or 0))
-        window.Position = utility.center(window.AbsoluteSize.X, main.AbsoluteSize.Y)
+        main.Size = newUDim2(1, 0, 0, sizeY + (change_log.Visible and 34 + bound_addition or 0));
+        window.Position = utility.center(window.AbsoluteSize.X, main.AbsoluteSize.Y);
     end
 
-    load.MouseButton1Click:Connect(options.callback)
+    load.MouseButton1Click:Connect(options.callback);
 
     changelog.MouseButton1Click:Connect(function()
-        change_log.Visible = not change_log.Visible
-        resize()
-    end)
+        change_log.Visible = not change_log.Visible;
+        resize();
+    end);
 
-    resize()
+    resize();
 
-    local loader_types = {}
+    local loader_types = {};
 
     function loader_types:Set(description, percentage)
-        local textbounds = utility.text_length(description, library.font, library.font_size)
-        description_text.Text = description
-        description_text.Position = newUDim2(0.5, -textbounds.X * 0.5, 0, 2.5)
+        local textbounds = utility.text_length(description, library.font, library.font_size);
+        description_text.Text = description;
+        description_text.Position = newUDim2(0.5, -textbounds.X * 0.5, 0, 2.5);
 
-        fill.Size = newUDim2(percentage * 0.01, 0, 1, 0)
+        fill.Size = newUDim2(percentage * 0.01, 0, 1, 0);
     end
 
     function loader_types:Close()
-        window:Destroy()
+        window:Destroy();
     end
 
     close.MouseButton1Click:Connect(function()
-        loader_types:Close()
-    end)
+        loader_types:Close();
+    end);
 
-    utility.format(loader_types, true)
-    return loader_types
+    utility.format(loader_types, true);
+    return loader_types;
 end
 
 local left = library.notification_x == "left"
@@ -3584,7 +3546,7 @@ function library:Notify(options)
         Theme = "Window Background",
         OutlineTheme = "Black Border",
         ZIndex = 4,
-    })
+    });
 
     notification:Create("Square", {
         Size = newUDim2(1, 0, 0, 19),
@@ -3597,7 +3559,7 @@ function library:Notify(options)
         Theme = "Window Border",
         ZIndex = 5,
         OutlineTheme = "Black Border"
-    })
+    });
 
     notification:Create("Square", {
         Size = newUDim2(1, 0, 1, -19),
@@ -3605,7 +3567,7 @@ function library:Notify(options)
         ZIndex = 7,
         Theme = "Tab Background",
         OutlineTheme = "Tab Border"
-    })
+    });
 
     notification:Create("Text", {
         Text = options.title,
@@ -3889,8 +3851,8 @@ function library:Playerlist(max_players)
             player_data[plr].name = plr.Name
 
             spawn(function()
-                local thumbnail_data = services.HttpService:JSONDecode(request{Url = ("https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=%s&size=60x60&format=Png"):format(plr.UserId), Method = "GET"}.Body)
-                local image = request{Url = thumbnail_data.data[1].imageUrl, Method = "GET"}.Body
+                local thumbnail_data = services.HttpService:JSONDecode(syn.request{Url = ("https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=%s&size=60x60&format=Png"):format(plr.UserId), Method = "GET"}.Body)
+                local image = syn.request{Url = thumbnail_data.data[1].imageUrl, Method = "GET"}.Body
 
                 player_data[plr].image = image
                 
@@ -4145,7 +4107,7 @@ function library:Playerlist(max_players)
 end
 
 function library:Window(options)
-    utility.format(options)
+    utility.format(options);
 
     utility.defaults(options, {
         title = "Window",
@@ -4153,9 +4115,7 @@ function library:Window(options)
         doublecolumns = true,
         sizex = 200,
         sizey = 260,
-    })
-
-    utility.mousething(library.open)
+    });
 
     local window = Render:Create("Square", {
         Size = newUDim2(0, options.sizex, 0, 22),
@@ -4218,7 +4178,7 @@ function library:Window(options)
         ZIndex = 75,
         Theme = "Tab Background",
         OutlineTheme = "Tab Border"
-    })
+    });
 
     local holder = background:Create("Square", {
         Size = newUDim2(1, -12, 1, -12),
@@ -4226,27 +4186,27 @@ function library:Window(options)
         Transparency = 0,
         Visible = true,
         Outline = false
-    })
+    });
 
     local left_column = holder:Create("Square", {
         Transparency = 0,
         Outline = false,
         Size = newUDim2(1 / 2, -6, 1, 0)
-    })
+    });
 
-    left_column:AddList(12)
+    left_column:AddList(12);
 
     local right_column = holder:Create("Square", {
         Transparency = 0,
         Outline = false,
         Size = newUDim2(1 / 2, -6, 1, 0),
         Position = newUDim2(1 / 2, 6, 0, 0)
-    })
+    });
 
-    right_column:AddList(12)
+    right_column:AddList(12);
 
-    local window_types = {Visible = options.visible, tab = holder, tab_buttons = {}, text_bounds = 0, double_columns = options.doublecolumns, left_column = left_column}
-    self.windows[window] = window_types
+    local window_types = {Visible = options.visible, tab = holder, tab_buttons = {}, text_bounds = 0, double_columns = options.doublecolumns, left_column = left_column};
+    self.windows[window] = window_types;
 
     --[[function window_types:SubTab(name)
         self.has_subtabs = true
@@ -4322,29 +4282,29 @@ function library:Window(options)
     function window_types:Section(options)
         if self.has_subtabs then return end
 
-        utility.format(options)
+        utility.format(options);
 
         utility.defaults(options, {
             name = "Section",
             side = "left",
-        })
+        });
 
-        local side = options.side:lower()
-        local column = self.double_columns and (side == "left" and left_column or right_column) or left_column
+        local side = options.side:lower();
+        local column = self.double_columns and (side == "left" and left_column or right_column) or left_column;
 
         local section = column:Create("Square", {
             Size = newUDim2(1, 0, 0, 40),
             ZIndex = 77,
             Theme = "Section Background",
             OutlineTheme = "Section Border"
-        })
+        });
 
         local title_background = section:Create("Square", {
             Size = newUDim2(1, 0, 0, 18),
             ZIndex = 79,
             Theme = "Section Background",
             OutlineTheme = "Section Border"
-        })
+        });
 
         title_background:Create("Text", {
             Text = options.name,
@@ -4353,7 +4313,7 @@ function library:Window(options)
             Position = newUDim2(0, 6, 0, 2),
             Theme = "Text",
             ZIndex = 80
-        })
+        });
 
         local section_content = section:Create("Square", {
             Size = newUDim2(1, -10, 0, 0),
@@ -4361,15 +4321,15 @@ function library:Window(options)
             Transparency = 0,
             Visible = true,
             Outline = false
-        })
+        });
 
-        section_content:AddList(8)
+        section_content:AddList(8);
 
         local section_types = {tab = window_types, main = section, content = section_content, Resize = function(self)
             if self.content._list._contentSize + 20 > self.main.AbsoluteSize.Y then
                 self.main.Size = newUDim2(1, 0, 0, self.content._list._contentSize + 20)
             end
-        end}
+        end};
 
         function section_types:Label(str)
             str = str or "label"
@@ -4427,7 +4387,7 @@ function library:Window(options)
                 ZIndex = 79
             })
 
-            return components.toggle(holder, options, 79)
+            return components.toggle(holder, options, 79);
         end
 
         function section_types:Box(options)
@@ -4534,8 +4494,8 @@ function library:Window(options)
         end
 
         function section_types:Subgroup(options)
-            utility.format(options)
-            options.name = options.name or "subgroup"
+            utility.format(options);
+            options.name = options.name or "subgroup";
 
             local holder = {section = self}
 
@@ -4544,7 +4504,7 @@ function library:Window(options)
                 Transparency = 0,
                 ZIndex = 80,
                 Outline = false
-            })
+            });
             
             holder.text = holder.main:Create("Text", {
                 Text = options.name,
@@ -4552,30 +4512,27 @@ function library:Window(options)
                 Size = library.font_size,
                 Theme = "Text",
                 ZIndex = 79
-            })
+            });
 
-            self:Resize()
+            self:Resize();
 
-            return components.subgroup(holder, options, 81)
+            return components.subgroup(holder, options, 81);
         end
 
-        utility.format(section_types, true)
-        return section_types
+        utility.format(section_types, true);
+        return section_types;
     end
 
     function window_types:Toggle()
-        window_types.Visible = not window_types.Visible
+        window_types.Visible = not window_types.Visible;
 
         if library.open then
             window.Visible = window_types.Visible
-            library.open = window.Visible
         end
-
-        utility.mousething(library.open)
     end
 
-    utility.format(window_types, true)
-    return window_types
+    utility.format(window_types, true);
+    return window_types;
 end
 
 function library:Load(options)
@@ -4602,7 +4559,7 @@ function library:Load(options)
         keybindlist = true,
         font = worldtoscreen ~= nil and "system" or "plex",
         fontsize = 13,
-        discord = "mqdBs4zf4s",
+        discord = "6wp393UeCc",
         sizex = 700,
         sizey = 550
     })
@@ -4919,7 +4876,7 @@ function library:Load(options)
                 Theme = "Section Border",
                 ZIndex = 6,
                 OutlineTheme = "Black Border"
-            })
+            });
 
             local background = section:Create("Square", {
                 Size = newUDim2(1, 0, 1, -18),
@@ -4927,7 +4884,7 @@ function library:Load(options)
                 ZIndex = 8,
                 Theme = "Section Background",
                 OutlineTheme = "Section Border"
-            })
+            });
 
             for i, name in next, options.sections do
                 local first = i == 1
@@ -4991,7 +4948,7 @@ function library:Load(options)
                         Font = library.font,
                         Size = library.font_size,
                         Theme = "Text",
-                        ZIndex = 9
+                        ZIndex = 8
                     })
     
                     self:Resize()
@@ -5083,7 +5040,7 @@ function library:Load(options)
                         Font = library.font,
                         Size = library.font_size,
                         Theme = "Text",
-                        ZIndex = 9
+                        ZIndex = 8
                     })
     
                     return components.dropdown(holder, options)
@@ -5142,8 +5099,8 @@ function library:Load(options)
                 end
 
                 function section_types:Subgroup(options)
-                    utility.format(options)
-                    options.name = options.name or "subgroup"
+                    utility.format(options);
+                    options.name = options.name or "subgroup";
 
                     local holder = {section = self}
 
@@ -5152,7 +5109,7 @@ function library:Load(options)
                         Transparency = 0,
                         ZIndex = 10,
                         Outline = false
-                    })
+                    });
 
                     holder.text = holder.main:Create("Text", {
                         Text = options.name,
@@ -5160,11 +5117,11 @@ function library:Load(options)
                         Size = library.font_size,
                         Theme = "Text",
                         ZIndex = 9
-                    })
+                    });
 
-                    self:Resize()
+                    self:Resize();
 
-                    return components.subgroup(holder, options)
+                    return components.subgroup(holder, options);
                 end
 
                 utility.format(section_types, true)
@@ -5206,10 +5163,10 @@ function library:Load(options)
             flag = "selected_config",
             callback = function(selected)
                 if (autoload) then
-                    local auto_load_config = library:GetAutoLoadConfig()
+                    local auto_load_config = library:GetAutoLoadConfig();
 
                     if (selected == auto_load_config) then
-                        autoload:set(true)
+                        autoload:set(true);
                     end
                 end
             end
@@ -5261,11 +5218,11 @@ function library:Load(options)
         configs:Button{
             name = "Delete Config",
             callback = function()
-                local selected = library.flags["selected_config"]
+                local selected = library.flags["selected_config"];
                 if (selected) then
-                    library:DeleteConfig(selected)
+                    library:DeleteConfig(selected);
                     config_dropdown:Refresh(library:GetConfigs())
-                    library:Notify{title = "Configuration", message = ("Successfully deleted config '%s'"):format(selected), duration = 5}
+                    library:Notify{title = "Configuration", message = ("Successfully deleted config '%s'"):format(selected), duration = 5};
                 end
             end
         }
@@ -5276,10 +5233,10 @@ function library:Load(options)
             flag = "auto_load",
             callback = function(value)
                 if library.initialized then
-                    local selected = library.flags["selected_config"]
+                    local selected = library.flags["selected_config"];
 
                     if (selected) then
-                        library:SetAutoLoadConfig(value and selected or "")
+                        library:SetAutoLoadConfig(value and selected or "");
 
                         if (value) then
                             library:Notify{title = "Configuration", message = ("Successfully set config '%s' as auto load"):format(library.flags["selected_config"])}
@@ -5291,7 +5248,7 @@ function library:Load(options)
 
         local themes, customTheme = settings:multiSection{Side = "middle", Sections = { "Themes", "Custom Theme" }}
         local theme_colorpickers = {}
-        library.theme_colorpickers = theme_colorpickers
+        library.theme_colorpickers = theme_colorpickers;
 
         local theme_options = {"Accent", "Window Background", "Window Border", "Black Border", "Text", "Disabled Text", "Tab Background", "Tab Border", "Section Background", "Section Border", "Object Background", "Object Border", "Dropdown Option Background"}
 
@@ -5396,7 +5353,7 @@ function library:Load(options)
             min = 0,
             max = 1,
             callback = function(value)
-                library.notification_speed = value
+                library.notification_speed = value;
             end
         }
 
@@ -5470,8 +5427,8 @@ function library:Load(options)
             callback = function(_, from_setting)
                 if not from_setting then
                     (unload or function()
-                        library:Unload()
-                    end)()
+                        library:Unload();
+                    end)();
                 end
             end
         }
@@ -5483,7 +5440,7 @@ function library:Load(options)
             max = 1,
             flag = "tween_speed",
             callback = function(value)
-                library.tween_speed = value
+                library.tween_speed = value;
             end
         }
 
@@ -5494,7 +5451,7 @@ function library:Load(options)
             max = 1,
             flag = "fade_speed",
             callback = function(value)
-                library.toggle_speed = value
+                library.toggle_speed = value;
             end
         }
 
@@ -5511,7 +5468,7 @@ function library:Load(options)
         misc:Button{
             name = "Unload",
             callback = unload or function()
-                library:Unload()
+                library:Unload();
             end
         }
 
@@ -5562,5 +5519,131 @@ function library:Load(options)
     return window_types
 end
 
+
+--[[local window = library:Load{playerlist = true}
+
+library.Playerlist:button{name = "Prioritize", callback = function(list, plr)
+    if not list:IsTagged(plr, "Prioritized") then
+        list:Tag{player = plr, text = "Prioritized", color = fromRGB(255, 0, 0)}
+    else
+        list:RemoveTag(plr, "Prioritized")
+    end
+end}
+
+library.Playerlist:button{name = "Ignore", callback = function(list, plr)
+    if not library.Playerlist:IsTagged(plr, "Ignored") then
+        library.Playerlist:Tag{player = plr, text = "Ignored", Color = fromRGB(120, 120, 120)}
+    else
+        library.Playerlist:RemoveTag(plr, "Ignored")
+    end
+end}
+
+library.Playerlist:Label{name = "Rank: ", handler = function(plr)
+    return "1e+9"
+end}
+
+library.Playerlist:Label{name = "Team: ", handler = function(plr)
+    return "Ghosts", fromRGB(209, 118, 0)
+end}
+
+
+local watermark = library:Watermark("exodus | dev | test | 2.3b fps")
+window:SettingsTab(watermark)
+
+local tab = window:Tab("rage")
+local tab2 = window:Tab("visuals")
+window:Tab("legit"):Section{
+    Side = "Middle"
+}
+
+tab:Section{}
+
+
+
+local sec = tab:Section{
+    Side = "Right"
+}
+
+local label = sec:Label("fart")
+label:Set("hi")
+
+sec:Button{}
+sec:Button{}
+sec:Button{}
+sec:Button{}
+sec:Dropdown{content = {"hi", "bye"}}
+
+sec:Button{}
+local m = sec:Separator()
+sec:Button{name = "save config", callback = function() library:SaveConfig("fart") end}
+sec:Button{name = "load config", callback = function() library:LoadConfig("fart", true) end}
+sec:Button{callback = function() m:Set("testing 123") end}
+
+local tog = sec:Toggle{}
+tog:Slider{}
+local f = tog:Colorpicker{alpha = 1}
+f:SetAlpha(0.5)
+
+tog:Colorpicker{}
+
+local togel = sec:Toggle{}
+togel:Colorpicker{alpha = 1}
+togel:Colorpicker{}
+
+local togel = sec:Toggle{}
+togel:Slider{}
+
+local fartel = sec:Toggle{name = "aimbot"}
+fartel:Dropdown{}
+fartel:Keybind{mode = "hold", listname = "aimbot share fr"}
+
+local fartel = sec:Toggle{name = "keybind toggle"}
+fartel:Keybind{}
+
+sec:Box{
+    callback = function(str)
+        print(str)
+    end,
+    clearonfocus = false
+}
+
+sec:Slider{}
+sec:Keybind{}
+local label = sec:Label("fart")
+
+local enemies, teammates = tab:MultiSection{
+    Side = "Right",
+    Sections = {"enemies", "teammates"}
+}
+
+enemies:Button{}
+enemies:Button{}
+
+teammates:Button{}
+teammates:Button{}
+teammates:Button{name = "fart"}
+teammates:Button{}
+
+local label = teammates:Label("fart")
+label:Set("hi")
+
+local tab2 = window:Tab("test")
+local f = tab2:SubTab("hi")
+local g = tab2:SubTab("testf")
+local r = f:Section{name = "fart"}
+r:Button{}
+
+local r = g:Section{name = "poop"}
+r:Button{}
+
+library:Init()
+--wait(10)
+--library:Unload()
+library:Notify{duration = 3, Color = fromRGB(0, 0, 0)}
+task.wait(1)
+
+library:Notify{duration = 3, Color = fromRGB(0, 0, 0)}
+]]--
+
 utility.format(library, true)
-return library
+return library;
