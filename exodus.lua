@@ -1,7 +1,3 @@
-  --[[
-    Render object class thing for UI Libraries
-]]
-
 repeat task.wait() until game:IsLoaded()
 
 -- Localization
@@ -649,11 +645,13 @@ function Render:Destroy(from_clear)
             destroy(self._outline)
         end
 
-        for _, event in next, self._events do
-            if typeof(event) == "table" and event.Destroy then
-                event:Destroy()
+        pcall(function()
+            for _, event in next, self._events do
+                if typeof(event) == "table" and event.Destroy then
+                    event:Destroy()
+                end
             end
-        end
+        end)
 
         if not from_clear then
             remove(genv.render_cache, self._cacheIndex)
