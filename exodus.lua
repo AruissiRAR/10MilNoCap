@@ -2959,7 +2959,6 @@ function library:CreateFolder(name)
     local folder = ("%s\\%s\\%s"):format(self.folder, self.game, name)
 
     if not isfolder(folder) then
-        print("createfolder[createfolder] called")
         makefolder(folder)
     end
 
@@ -2972,7 +2971,6 @@ function library:CreateFile(folder, name, extension)
     if typeof(name) == "string" and name:find("%S+") then
         local folder = self:CreateFolder(folder)
         local file = ("%s\\%s.%s"):format(folder, name, extension)
-        print("createfiler[writefile] called")
         writefile(file, extension == "json" and "{}" or "")
 
         return true
@@ -2983,12 +2981,10 @@ function library:SaveFile(folder, name, extension, data)
     extension = extension or self.extension
 
     if typeof(name) == "string" and name:find("%S+") then
-        print("savefiled")
         local folder = self:CreateFolder(folder)
         local file = ("%s\\%s.%s"):format(folder, name, extension)
 
         if isfile(file) then
-            print("wrote file")
             writefile(file, data)
         end
     end
