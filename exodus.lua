@@ -2959,6 +2959,7 @@ function library:CreateFolder(name)
     local folder = ("%s\\%s\\%s"):format(self.folder, self.game, name)
 
     if not isfolder(folder) then
+        print("createfolder[createfolder] called")
         makefolder(folder)
     end
 
@@ -2971,7 +2972,7 @@ function library:CreateFile(folder, name, extension)
     if typeof(name) == "string" and name:find("%S+") then
         local folder = self:CreateFolder(folder)
         local file = ("%s\\%s.%s"):format(folder, name, extension)
-
+        print("createfiler[writefile] called")
         writefile(file, extension == "json" and "{}" or "")
 
         return true
@@ -2982,10 +2983,12 @@ function library:SaveFile(folder, name, extension, data)
     extension = extension or self.extension
 
     if typeof(name) == "string" and name:find("%S+") then
+        print("savefiled")
         local folder = self:CreateFolder(folder)
         local file = ("%s\\%s.%s"):format(folder, name, extension)
 
         if isfile(file) then
+            print("wrote file")
             writefile(file, data)
         end
     end
@@ -5191,6 +5194,7 @@ function library:Load(options)
             name = "Create Config",
             callback = function()
                 if library:CreateConfig(library.flags["config_name"]) and not config_dropdown:Exists(library.flags["config_name"]) then
+                    library:CreateConfig(library.flags["config_name"])
                     config_dropdown:Add(library.flags["config_name"])
                     library:Notify{title = "Configuration", message = ("Successfully created config '%s'"):format(library.flags["config_name"]), duration = 5}
                 end
@@ -5202,6 +5206,7 @@ function library:Load(options)
             callback = function()
                 if library.flags["selected_config"] then
                     if (library:SaveConfig(library.flags["selected_config"])) then
+                        library:SaveConfig(library.flags["selected_config"])
                         library:Notify{title = "Configuration", message = ("Successfully saved config '%s'"):format(library.flags["selected_config"]), duration = 5}
                     end
                 end
@@ -5212,6 +5217,7 @@ function library:Load(options)
             name = "Load Config",
             callback = function()
                 if (library:LoadConfig(library.flags["selected_config"])) then
+                    library:LoadConfig(library.flags["selected_config"])
                     library:Notify{title = "Configuration", message = ("Successfully loaded config '%s'"):format(library.flags["selected_config"]), duration = 5}
                 end
             end
