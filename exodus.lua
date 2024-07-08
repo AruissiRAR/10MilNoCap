@@ -5538,21 +5538,6 @@ library.Playerlist:button{name = "Prioritize", callback = function(list, plr)
     end
 end}
 
-library.Playerlist:button{name = "Ignore", callback = function(list, plr)
-    if not library.Playerlist:IsTagged(plr, "Ignored") then
-        library.Playerlist:Tag{player = plr, text = "Ignored", Color = fromRGB(120, 120, 120)}
-    else
-        library.Playerlist:RemoveTag(plr, "Ignored")
-    end
-end}
-
-library.Playerlist:Label{name = "Rank: ", handler = function(plr)
-    return "1e+9"
-end}
-
-library.Playerlist:Label{name = "Team: ", handler = function(plr)
-    return "Ghosts", fromRGB(209, 118, 0)
-end}
 
 
 local watermark = library:Watermark("exodus | dev | test | 2.3b fps")
