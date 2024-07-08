@@ -3030,7 +3030,8 @@ end
 
 function library:CreateConfig(name)
     if name ~= "auto_load" then
-        return self:CreateFile("configs", name)
+        self:CreateFile("configs", name)
+        return self:SaveFile(name)
     end
 end
 
