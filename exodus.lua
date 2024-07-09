@@ -2950,6 +2950,7 @@ function library:FadeIn()
 end
 
 function library:Init()
+    self:LoadConfig(library:GetAutoLoadConfig());
     self:FadeIn();
     self.initialized = true;
 end
