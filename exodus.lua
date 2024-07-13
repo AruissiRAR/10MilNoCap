@@ -697,6 +697,7 @@ local library = {
     connections = {},
     flags = {},
     initialized = false,
+    IsLoaded = false,
     open = false,
     unloaded = false,
     performance_drag = true,
@@ -2813,6 +2814,9 @@ function library:Connect(event, callback)
     return connection
 end
 
+function library:IsReady()
+    return game:IsLoaded() and library.IsLoaded
+end
 function library:Disconnect(connection)
     connection:Disconnect()
     self.connections[connection] = nil
@@ -5635,4 +5639,5 @@ library:Notify{duration = 3, Color = fromRGB(0, 0, 0)}
 ]]--
 
 utility.format(library, true)
+library.IsLoaded = true
 return library;
