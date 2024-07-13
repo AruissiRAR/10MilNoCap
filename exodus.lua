@@ -2815,7 +2815,7 @@ function library:Connect(event, callback)
 end
 
 function library:IsReady()
-    return game:IsLoaded() and library.IsLoaded
+    return game:IsLoaded() and library.IsLoaded and #library.flags > 1
 end
 function library:Disconnect(connection)
     connection:Disconnect()
